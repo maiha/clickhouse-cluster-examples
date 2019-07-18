@@ -1,0 +1,37 @@
+<yandex>
+  <!-- macros -->
+
+  <!-- ZooKeeper -->
+  <zookeeper>
+    <node index="1">
+      <host>zk</host>
+      <port>2181</port>
+    </node>
+  </zookeeper>
+
+  <!-- Cluster -->
+  <remote_servers>
+    <c1>
+      <shard>
+        <weight>1</weight>
+        <internal_replication>true</internal_replication>
+        <replica>
+          <host>ch1</host>
+          <port>9000</port>
+          <user>default</user>
+          <password></password>
+        </replica>
+      </shard>
+      <shard>
+        <weight>1</weight>
+        <internal_replication>true</internal_replication>
+        <replica>
+          <host>ch2</host>
+          <port>9000</port>
+          <user>default</user>
+          <password></password>
+        </replica>
+      </shard>
+    </c1>
+  </remote_servers>
+</yandex>

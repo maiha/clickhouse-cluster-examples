@@ -36,3 +36,10 @@ ENGINE = MergeTree(date, date, 8192);
 ## Contributors
 
 - [maiha](https://github.com/maiha) maiha - creator, maintainer
+
+<!---
+[graph]
+01: https://textik.com/#98799a1d845a311d
+03: https://textik.com/#64ef17979edd8908
+03:
+  -->

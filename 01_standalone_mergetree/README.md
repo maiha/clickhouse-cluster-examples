@@ -1,15 +1,19 @@
-# standalone server
+# standalone server with MergeTree
 
 The simplest topology is to prepare one node with one **MergeTree** table.
 
-- 1 node (port: 9001)
+- [1 node](./docker-compose.yml) ( `s1:9000` )
 - 1 table
 
 ```text
- +------------------+ 
- | logs : MergeTree |
- +------------------+
- s1:9001
+ s1:9000
+  +------------------+
+  | logs : MergeTree |
+  +------------------+
+   [2018-12-30      1]
+   [2018-12-31      2]
+   [2019-01-01      3]
+   [2019-01-02      4]
 ```
 
 Here, all data is stored in one table, and all operations can be performed directly on that table.

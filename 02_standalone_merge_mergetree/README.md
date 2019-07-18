@@ -1,20 +1,22 @@
-# standalone server with Merge engine
+# standalone server with Merge engine and MergeTree
 
 By using the **Merge** engine, we can divide it into multiple tables.
 
-- 1 node (port: 9001)
+- [1 node](./docker-compose.yml) ( `s1:9000` )
 - 2 tables
 
 ```text
-  +--------------------------------+
-  |  logs : Merge                  |
-  |     +-----------------------+  |
-  |     | logs_2018 : MergeTree |  |
-  |     +-----------------------+  |
-  |     | logs_2019 : MergeTree |  |
-  |     +-----------------------+  |
-  +--------------------------------+
-   s1:9001
+ s1:9000
+ +--------------------------------------------------------+
+ | logs : Merge                                           |
+ |                                                        |
+ |  +-----------------------+  +-----------------------+  |
+ |  | logs_2018 : MergeTree |  | logs_2019 : MergeTree |  |
+ |  +-----------------------+  +-----------------------+  |
+ |        [2018-12-30      1]        [2019-01-01      3]  |
+ |        [2018-12-31      2]        [2019-01-02      4]  |
+ |                                                        |
+ +--------------------------------------------------------+
 ```
 
 By accessing to the merge table, the whole can be treated as one table, and further, individual tables can be manipulated directly. This is useful for replacing data on a per-table basis.
