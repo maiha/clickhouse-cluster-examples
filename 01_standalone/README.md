@@ -1,6 +1,6 @@
 # standalone server
 
-The simplest topology is to prepare one node with one table.
+The simplest topology is to prepare one node with one **MergeTree** table.
 
 - 1 node (port: 9001)
 - 1 table
@@ -16,11 +16,7 @@ Here, all data is stored in one table, and all operations can be performed direc
 
 ## TABLES
 
-- [logs.sql](./meta/logs.sql)
-
-```text
-logs : MergeTree(date, date, 8192)
-```
+- [logs](./meta/logs.sql) : `MergeTree(date, date, 8192)`
 
 ## WRITE
 

@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  s1:
+    image: yandex/clickhouse-server
+    ports:
+      - "9001:9000"
+    volumes:
+      - "./conf/common.xml:/etc/clickhouse-server/conf.d/config.xml:ro"
