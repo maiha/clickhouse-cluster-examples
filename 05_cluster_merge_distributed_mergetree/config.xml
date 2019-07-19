@@ -1,0 +1,19 @@
+<yandex>
+  <!-- Cluster -->
+  <remote_servers>
+    <c1>
+      <shard>
+        <replica>
+          <host>s1</host>
+          <port>9000</port>
+        </replica>
+      </shard>
+      <shard>
+        <replica>
+          <host>s2</host>
+          <port>9000</port>
+        </replica>
+      </shard>
+    </c1>
+  </remote_servers>
+</yandex>

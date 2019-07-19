@@ -42,4 +42,5 @@ ENGINE = MergeTree(date, date, 8192);
 01: https://textik.com/#98799a1d845a311d
 03: https://textik.com/#64ef17979edd8908
 04: https://textik.com/#a84780caf2f6ec42
+05: https://textik.com/#88b014ea2efa5d4c
   -->
