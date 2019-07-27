@@ -25,6 +25,16 @@ ENGINE = MergeTree(date, date, 8192);
 2019-01-02      4
 ```
 
+## Roadmap
+
+- [x] standalone server with MergeTree
+- [x] standalone server with Merge engine and MergeTree
+- [x] cluster Distributed MergeTree
+- [x] cluster Distributed Merge and MergeTree
+- [x] cluster Merge Distributed MergeTree
+- [x] cluster simple replication w/o internal_replication
+- [ ] cluster ReplicatedMergeTree with ZooKeeper
+
 ## Contributing
 
 1. Fork it (<https://github.com/maiha/clickhouse-cluster-examples/fork>)
