@@ -5,5 +5,3 @@ services:
     image: yandex/clickhouse-server
     ports:
       - "9001:9000"
-    volumes:
-      - "./config.xml:/etc/clickhouse-server/conf.d/config.xml:ro"

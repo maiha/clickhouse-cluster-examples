@@ -5,8 +5,12 @@ The simplest topology is to prepare one node with one **MergeTree** table.
 - [1 node](./docker-compose.yml) ( `s1:9000` )
 - 1 table
 
+<!---
+https://textik.com/#98799a1d845a311d
+-->
+
 ```text
- s1:9000
+  s1:9000
   +------------------+
   | logs : MergeTree |
   +------------------+

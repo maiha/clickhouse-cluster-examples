@@ -1,5 +1,4 @@
 <yandex>
-
   <!-- Distributed -->
   <remote_servers>
     <c1>
@@ -16,5 +15,4 @@
       </shard>
     </c1>
   </remote_servers>
-
 </yandex>

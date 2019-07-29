@@ -5,6 +5,10 @@
 - [2 nodes](./docker-compose.yml) ( `s1:9000`, `s2:9000`, )
 - 1 table per 1 node
 
+<!---
+https://textik.com/#64ef17979edd8908
+-->
+
 ```text
  all_logs : Distributed (cluster)
  <-------------------------------------------------------------->

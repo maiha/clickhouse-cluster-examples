@@ -5,6 +5,10 @@
 - [2 nodes](./docker-compose.yml) ( `s1:9000`, `s2:9000`, )
 - 2 tables per 1 node ( `logs_2018`, `logs_2019` )
 
+<!---
+https://textik.com/#88b014ea2efa5d4c
+-->
+
 ```text
  all_logs : Merge                                                                  
  <-------------------------------------------------------------------------------->

@@ -6,7 +6,7 @@ By using the **Merge** engine, we can divide it into multiple tables.
 - 2 tables
 
 ```text
- s1:9000
+  s1:9000
   +---------------------------------+
   |         logs : Merge            |
   | <-----------------------------> |
