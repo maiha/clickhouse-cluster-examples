@@ -1,0 +1,9 @@
+<yandex>
+  <macros>
+    <shard>1</shard>
+    <replica>s1</replica>
+  </macros>
+
+  <!-- Replication -->
+  <interserver_http_host>s1</interserver_http_host>
+</yandex>

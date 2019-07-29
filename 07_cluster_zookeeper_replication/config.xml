@@ -1,0 +1,27 @@
+<yandex>
+  <!-- ZooKeeper -->
+  <zookeeper>
+    <node index="1">
+      <host>zk</host>
+      <port>2181</port>
+    </node>
+  </zookeeper>
+
+  <!-- Distributed -->
+  <remote_servers>
+    <c1>
+      <shard>
+	<internal_replication>true</internal_replication>
+	<replica>
+	  <host>s1</host>
+	  <port>9000</port>
+	</replica>
+	<replica>
+	  <host>s2</host>
+	  <port>9000</port>
+	</replica>
+      </shard>
+    </c1>
+  </remote_servers>
+
+</yandex>
