@@ -1,6 +1,8 @@
 # cluster Replicated MergeTree with ZooKeeper
 
-**Replicated** engine provides replication among servers for `INSERT` and `ALTER` queries.
+**Replicated** engine shares `INSERT` and `ALTER` queries asynchronously between nodes.
+
+The node receiving the command stores the actual data in its own table, and records the metadata in ZooKeeper. In addition, each node monitors ZooKeeper for update metadata that has occurred within the same fragment. If an INSERT is found, update data is obtained directly from the update node.
 
 - [ZooKeeper](./docker-compose.yml) ( `zk:2181` )
 - [2 nodes](./docker-compose.yml) ( `s1:9000`, `s2:9000`, )
@@ -15,21 +17,24 @@ https://textik.com/#70c1d375c4225465
                              |
  <-------------------------------------------------------------------------->
                    2.WRITE   |
-    s1:9000 <----------------+          s2:9000
-    +--------------------------------+  +--------------------------------+
-    | +----------------------------+ |  | +----------------------------+ |
-    | | logs : ReplicatedMergeTree | |  | | logs : ReplicatedMergeTree | |
-    | +----------------------------+ |  | +----------------------------+ |
-    |  |            ["2018-12-30",1] |  |               ["2018-12-30",1] |
-    |  |            ["2018-12-31",2] |  |               ["2018-12-31",2] |
-    |  |            ["2019-01-01",3] |  |               ["2019-01-01",3] |
-    |  |            ["2019-01-02",4] |  |               ["2019-01-02",4] |
-    +--|-----------------------------+  +--------------------------------+
-       |  zk:2181                                                    |
-       |  +----------------------------------------------------+     |
-       |  |      +-----------------------------------------+   |     |
-       +-------> | /clickhouse/tables/1/default.logs/block | <-------+
-  3.WRITE |      +-----------------------------------------+   |  4.SYNC
+    s1:9000 <----------------+            s2:9000
+    +--------------------------------+    +--------------------------------+
+    | +----------------------------+ |    | +----------------------------+ |
+    | | logs : ReplicatedMergeTree | |    | | logs : ReplicatedMergeTree | |
+    | +----------------------------+ |    | +----------------------------+ |
+    |  |            ["2018-12-30",1] |    |               ["2018-12-30",1] |
+    |  |            ["2018-12-31",2] |    |               ["2018-12-31",2] |
+    |  |            ["2019-01-01",3] |    |               ["2019-01-01",3] |
+    |  |            ["2019-01-02",4] |    |               ["2019-01-02",4] |
+    +--|-----------------------------+    +--------------------------------+
+       |         [interserver] s1:9009 <-------------------------------|
+       |    (config: interserver_http_host        4. REPLICA SYNC      |
+       |             interserver_http_port)                            |
+       |  zk:2181                                                      |
+       |  +----------------------------------------------------+       |
+       |  |      +-----------------------------------------+   |       |
+       +-------> | /clickhouse/tables/1/default.logs/block | <---------+
+  3.WRITE |      +-----------------------------------------+   |  (monitor)
           | [20181230_5383472499804002539_1700904329733462805] |
           | [20181231_1114583668837677782_7297308974928976135] |
           | [20190101_3142061115699531382_7149022940449705633] |
@@ -57,17 +62,21 @@ Those hostnames are `s1` and `s2`.
 Here, `{xxx}` is substituted by macro those variables are defined in `<macros>` setting.
 
 - Macro configuration files are mounted by [docker](./docker-compose.yml) for each container.
-- [s1.xml](./s1.xml)
-- [s2.xml](./s2.xml)
+  - [s1.xml](./s1.xml)
+  - [s2.xml](./s2.xml)
 
 ## WRITE
 
 `ReplicatedMergeTree` with `internal_replication=true` works as follows for writing.
 
-1. write the data in his storage (same as `MergeTree`)
-2. write the metadata as replication table in ZooKeeper
-3. (another nodes in same shard) watch replication table
-4. (when new data found) synchronize data by connecting to the node with port 9009
+- (target node)
+  1. First, write actual data in its table (acts same as `MergeTree`)
+  2. Then, write the metadata as replication table in ZooKeeper
+
+- (nodes in same shard)
+  1. monitor replication table in ZooKeeper
+  2. synchronize data by connecting to the node directly when new data found
+    - config: `interserver_http_host`, `interserver_http_port`
 
 Therefore, data is automatically synchronized within the same shard,
 regardless of whether it is written to the Distributed or Replicated table.

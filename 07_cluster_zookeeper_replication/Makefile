@@ -32,7 +32,7 @@ spec:
 test: zk-clear meta data spec
 
 zk-clear:
-	@docker-compose exec zk zkCli.sh deleteall /clickhouse > /dev/null
+	@docker-compose exec zk zkCli.sh deleteall /clickhouse/tables > /dev/null || true
 
 .PHONY : info
 info:
