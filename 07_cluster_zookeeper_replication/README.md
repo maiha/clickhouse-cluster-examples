@@ -5,7 +5,7 @@
 The node receiving the command stores the actual data in its own table, and records the metadata in ZooKeeper. In addition, each node monitors ZooKeeper for update metadata that has occurred within the same fragment. If an INSERT is found, update data is obtained directly from the update node.
 
 - [ZooKeeper](./docker-compose.yml) ( `zk:2181` )
-- [2 nodes](./docker-compose.yml) ( `s1:9000`, `s2:9000`, )
+- [1 shard](./config.xml) [2 nodes](./docker-compose.yml) ( `s1:9000`, `s2:9000`, )
 - 1 table per 1 node
 
 <!---
@@ -44,13 +44,14 @@ https://textik.com/#70c1d375c4225465
 
 ## ZooKeeper
 
-- write location of ZooKeeper in [config.xml](./config.xml)
+- write node setting in `zookeeper` section ([config.xml](./config.xml))
 
 ## CLUSTER
 
-The setting of cluster must be written in config file like [config.xml](./config.xml).
-Here, we define a `c1` cluster consisting of two nodes.
-Those hostnames are `s1` and `s2`.
+- write shard setting `remote_servers` section ([config.xml](./config.xml))
+
+Here we define the `c1` cluster with one shard.
+The shard consists of two nodes running on `s1` and` s2`, and operates with redundancy 2 as dual masters of that shard.
 
 ## TABLES
 

@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  zk:
+    image: zookeeper
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zk:2888:3888;2181
+  s1:
+    image: yandex/clickhouse-server
+    depends_on:
+      - zk
+    ports:
+      - "9001:9000"
+    volumes:
+      - "./config.xml:/etc/clickhouse-server/config.d/common.xml:ro"
+      - "./s1.xml:/etc/clickhouse-server/config.d/local.xml:ro"
+  s2:
+    image: yandex/clickhouse-server
+    depends_on:
+      - zk
+    ports:
+      - "9002:9000"
+    volumes:
+      - "./config.xml:/etc/clickhouse-server/config.d/common.xml:ro"
+      - "./s2.xml:/etc/clickhouse-server/config.d/local.xml:ro"
+  s3:
+    image: yandex/clickhouse-server
+    depends_on:
+      - zk
+    ports:
+      - "9003:9000"
+    volumes:
+      - "./config.xml:/etc/clickhouse-server/config.d/common.xml:ro"
+      - "./s3.xml:/etc/clickhouse-server/config.d/local.xml:ro"
+  s4:
+    image: yandex/clickhouse-server
+    depends_on:
+      - zk
+    ports:
+      - "9004:9000"
+    volumes:
+      - "./config.xml:/etc/clickhouse-server/config.d/common.xml:ro"
+      - "./s4.xml:/etc/clickhouse-server/config.d/local.xml:ro"
