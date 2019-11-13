@@ -99,14 +99,14 @@ Therefore, data is automatically synchronized within the same shard,
 regardless of whether it is written to the Distributed or Replicated table.
 
 ```console
-$ cat data/*.csv | clickhouse-client --port 9001 -m -n -A -q 'INSERT INTO all_logs FORMAT CSV'
+$ cat data/1/*.csv | clickhouse-client --port 9001 -m -n -A -q 'INSERT INTO all_logs FORMAT CSV'
 ```
 
 or
 
 ```console
-$ cat data/2018*.csv | clickhouse-client --port 9001 -m -n -A -q 'INSERT INTO logs FORMAT CSV'
-$ cat data/2019*.csv | clickhouse-client --port 9003 -m -n -A -q 'INSERT INTO logs FORMAT CSV'
+$ cat data/1/2018*.csv | clickhouse-client --port 9001 -m -n -A -q 'INSERT INTO logs FORMAT CSV'
+$ cat data/1/2019*.csv | clickhouse-client --port 9003 -m -n -A -q 'INSERT INTO logs FORMAT CSV'
 ```
 
 ## READ
@@ -142,47 +142,120 @@ $ clickhouse-client --port 9002 -A -q 'SELECT * FROM logs ORDER BY date'
 2019-01-02      4
 ```
 
-## play on console
+## play on console (replacing data)
 
 ```console
 $ make start
+$ make meta
+$ make data1
+```
 
-$ make test
-OK: spec
+The `data1` task puts the 2018 data in `s1` and the 2019 data in `s3` as follows.
+
+```console
+$ make info
+# DATA(s1:logs)
+2018-12-30      1
+2018-12-31      2
+# DATA(s3:logs)
+2019-01-01      3
+2019-01-02      4
+```
+
+Suppose we want to replace the data of `2019-01-01`.
+Replacing by `REPLACE PARTITION` is possible on a partition basis,
+and the `logs` table is already partitioned by `date`.
+
+### 1. temporary table
+
+First, prepare a temporary table that has the same structure as the target table.
+[logs_tmp.sql](./meta/logs_tmp.sql)
+```sql
+CREATE TABLE logs_tmp
+(
+    `date` Date, 
+    `value` UInt32
+)
+ENGINE = MergeTree
+PARTITION BY date
+ORDER BY tuple()
+```
+
+This table must be created on the node with the data we want to replace, in short `s3` here.
+
+### 2. replacing data
+
+Second, put the new data into the temporary table.
+Now, the table logs to be updated and the logs_tmp table containing the update data exist on `s3` as follows.
+```sql
+$ clickhouse-client --port 9003
+
+147297b26df5 :) select * from logs order by date;
+┌───────date─┬─value─┐
+│ 2019-01-01 │     3 │
+│ 2019-01-02 │     4 │
+└────────────┴───────┘
+
+147297b26df5 :) select * from logs_tmp order by date;
+┌───────date─┬─value─┐
+│ 2019-01-01 │     9 │
+└────────────┴───────┘
+```
+
+### 3. replace partition
+
+Finally, execute the `REPLACE PARTITION` command on `s3` to replace the data.
+
+```sql
+147297b26df5 :) ALTER TABLE logs REPLACE PARTITION '2019-01-01' FROM logs_tmp
+Ok.
+
+147297b26df5 :) select * from logs order by date;
+┌───────date─┬─value─┐
+│ 2019-01-01 │     9 │
+│ 2019-01-02 │     4 │
+└────────────┴───────┘
+```
+
+This process is immediately reflected in the cluster by replication,
+so you can check the update by querying other nodes.
+
+```console
+$ make info
+# DATA(s1:all_logs)
+2018-12-30      1
+2018-12-31      2
+2019-01-01      9
+2019-01-02      4
+```
+
+### IMPORTANT
+
+Because the replacement process is performed on the partition of that node,
+it must be performed on the node where the data to be replaced is stored.
+
+Otherwise, the old and new data will be mixed and the data will be doubled.
+
+```console
+$ make clean
+$ make meta
+$ make data1
+$ make data2via1
 
 $ make info
 # DATA(s1:all_logs)
-2018-12-30	1
-2018-12-31	2
-2019-01-01	3
-2019-01-02	4
-# DATA(s2:all_logs)
-2018-12-30	1
-2018-12-31	2
-2019-01-01	3
-2019-01-02	4
-# DATA(s3:all_logs)
-2018-12-30	1
-2018-12-31	2
-2019-01-01	3
-2019-01-02	4
-# DATA(s4:all_logs)
-2018-12-30	1
-2018-12-31	2
-2019-01-01	3
-2019-01-02	4
+2018-12-30      1
+2018-12-31      2
+2019-01-01      9
+2019-01-01      3
+2019-01-02      4
+...
 # DATA(s1:logs)
-2018-12-31	2
-2019-01-02	4
-# DATA(s2:logs)
-2018-12-31	2
-2019-01-02	4
+2018-12-30      1
+2018-12-31      2
+2019-01-01      9
+...
 # DATA(s3:logs)
-2018-12-30	1
-2019-01-01	3
-# DATA(s4:logs)
-2018-12-30	1
-2019-01-01	3
-
-$ make stop
+2019-01-01      3
+2019-01-02      4
 ```
